@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>澳門廚餘碳排放計算器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
+
+/* AUTH */
+#authScreen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(220,40,40,.35) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(180,20,20,.3) 0%, transparent 50%),
+              linear-gradient(160deg, #150406 0%, #22060a 50%, #0a0203 100%);
+  z-index: 100; padding: 20px; color: #fff; }
+.auth-card { position: relative; width: 100%; max-width: 400px;
+  background: linear-gradient(160deg, rgba(30,8,10,.95) 0%, rgba(20,5,8,.95) 100%);
+  border: 1px solid rgba(255,60,60,.3); border-radius: 20px; padding: 36px 30px 30px;
+  box-shadow: 0 0 0 1px rgba(255,100,100,.1), 0 20px 60px rgba(255,40,40,.25), 0 0 100px rgba(200,20,20,.15); }
+.auth-card::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 3px; border-radius: 20px 20px 0 0;
+  background: linear-gradient(90deg, transparent, #ff3b3b, #ff6b6b, #ff3b3b, transparent); background-size: 200% 100%; animation: borderSweep 4s linear infinite; }
+@keyframes borderSweep { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.auth-logo { text-align: center; font-size: 42px; margin-bottom: 6px; filter: drop-shadow(0 0 20px rgba(255,60,60,.7)); animation: logoFloat 3s ease-in-out infinite; }
+@keyframes logoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.auth-title { text-align: center; font-size: 22px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; text-shadow: 0 0 20px rgba(255,60,60,.6); }
+.auth-sub { text-align: center; font-size: 11px; color: #ff6b6b; letter-spacing: 3px; font-weight: 700; margin-bottom: 24px; opacity: .8; }
+.auth-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: rgba(0,0,0,.4); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,60,60,.15); }
+.auth-tab { flex: 1; padding: 10px; font-family: inherit; font-size: 13px; font-weight: 700; color: #aa6666; background: transparent; border: none; border-radius: 8px; cursor: pointer; transition: all .2s; }
+.auth-tab.active { background: linear-gradient(180deg, #ff3b3b 0%, #c41e1e 100%); color: #fff; box-shadow: 0 0 20px rgba(255,60,60,.5); }
+.auth-field { margin-bottom: 14px; }
+.auth-field label { display: block; font-size: 11px; font-weight: 700; color: #ff6b6b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.auth-input { width: 100%; padding: 13px 15px; font-size: 15px; font-family: inherit; color: #fff; background: rgba(0,0,0,.5); border: 1px solid rgba(255,60,60,.3); border-radius: 10px; outline: none; transition: all .2s; }
+.auth-input:focus { border-color: #ff3b3b; background: rgba(0,0,0,.7); box-shadow: 0 0 0 3px rgba(255,60,60,.15); }
+.auth-input::placeholder { color: #664444; }
+.auth-btn { width: 100%; padding: 14px; margin-top: 6px; font-family: inherit; font-size: 14px; font-weight: 800; letter-spacing: 2px; color: #fff;
+  background: linear-gradient(180deg, #ff3b3b 0%, #b81818 100%); border: none; border-radius: 12px; cursor: pointer;
+  box-shadow: 0 6px 0 #6b0f0f, 0 8px 20px rgba(255,40,40,.4); transition: all .1s; }
+.auth-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6b0f0f; }
+.auth-error { min-height: 20px; margin-top: 10px; font-size: 12px; color: #ff5555; text-align: center; font-weight: 600; }
+.auth-hint { text-align: center; margin-top: 14px; font-size: 10px; color: #553333; letter-spacing: 1px; }
+
+/* CALC */
+#calcScreen { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+  background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 45%, #80deea 100%);
+  padding: 20px; overflow-y: auto; z-index: 10; color: #1a3a3a; transition: opacity .5s; }
+#calcScreen.fade-out { opacity: 0; pointer-events: none; }
+.calc-wrap { width: 100%; max-width: 520px; }
+.calc-header { text-align: center; margin-bottom: 18px; }
+.calc-header h1 { font-size: 26px; font-weight: 800; color: #006064; margin-bottom: 3px; }
+.calc-header .subtitle { font-size: 10px; color: #4db6ac; letter-spacing: 3px; font-weight: 700; }
+.calc-header .tag { display: inline-block; background: linear-gradient(135deg,#b2ebf2,#80deea); color: #006064; font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 999px; margin-top: 8px; letter-spacing: 1px; }
+.calc-card { background: #fff; border-radius: 24px; padding: 26px 24px; box-shadow: 0 24px 60px rgba(0,150,170,.25), 0 8px 20px rgba(0,150,170,.1); }
+.food-inputs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.food-input-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  background: #f1fbfc; border: 2px solid #b2ebf2; border-radius: 14px; transition: border-color .2s; }
+.food-input-row:focus-within { border-color: #4dd0e1; background: #fff; }
+.fi-emoji { font-size: 24px; line-height: 1; }
+.fi-name { font-size: 14px; font-weight: 800; color: #006064; min-width: 42px; letter-spacing: .5px; }
+.fi-coef { font-size: 10px; color: #4db6ac; font-weight: 700; font-variant-numeric: tabular-nums; }
+.fi-input { flex: 1; padding: 8px 10px; font-family: inherit; font-size: 17px; font-weight: 800; color: #006064;
+  background: #fff; border: 2px solid #e0f7fa; border-radius: 10px; outline: none; text-align: center; font-variant-numeric: tabular-nums; transition: all .2s; }
+.fi-input:focus { border-color: #4dd0e1; box-shadow: 0 0 0 3px rgba(77,208,225,.15); }
+.fi-unit { font-size: 11px; color: #80cbc4; font-weight: 700; }
+.field { margin-bottom: 14px; }
+.field-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.field-label .name { font-size: 13px; font-weight: 700; color: #00695c; }
+.field-label .value { font-size: 15px; font-weight: 800; color: #00838f; font-variant-numeric: tabular-nums; }
+input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, #4dd0e1 0%, #4dd0e1 var(--fill,0%), #e0f7fa var(--fill,0%), #e0f7fa 100%); outline: none; cursor: pointer; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg,#26c6da,#00acc1); border: 3px solid #fff; box-shadow: 0 3px 10px rgba(0,150,170,.45); cursor: grab; }
+input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,#26c6da,#00acc1); border: 3px solid #fff; box-shadow: 0 3px 10px rgba(0,150,170,.45); cursor: grab; }
+.range-marks { display: flex; justify-content: space-between; margin-top: 5px; font-size: 10px; color: #80cbc4; font-weight: 600; padding: 0 4px; }
+.preview { margin-top: 18px; padding: 14px; background: linear-gradient(160deg,#f1fbfc,#e0f7fa); border-radius: 14px; border: 1px dashed #80deea; }
+.pv-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; color: #00838f; font-weight: 700; }
+.pv-row .pv-val { color: #006064; font-weight: 800; font-variant-numeric: tabular-nums; }
+.pv-row.main { font-size: 14px; padding-top: 8px; margin-top: 6px; border-top: 1px dashed #4dd0e1; color: #004d40; }
+.pv-row.main .pv-val { font-size: 18px; color: #006064; }
+.submit-btn { width: 100%; padding: 17px; margin-top: 16px; font-size: 16px; font-weight: 800; font-family: inherit; color: #fff;
+  background: linear-gradient(180deg,#7EE08A 0%,#5CBF68 50%,#4CAF50 100%); border: none; border-radius: 16px; cursor: pointer; letter-spacing: 1.5px;
+  position: relative; overflow: hidden; text-shadow: 0 2px 0 rgba(0,0,0,.15);
+  box-shadow: inset 0 3px 0 rgba(255,255,255,.4), inset 0 -3px 0 rgba(0,0,0,.15), 0 6px 0 #3a8a3e, 0 12px 24px rgba(0,0,0,.2); transition: all .1s; }
+.submit-btn:active { transform: translateY(5px); box-shadow: inset 0 2px 0 rgba(255,255,255,.3), 0 1px 0 #3a8a3e; }
+.submit-btn::after { content: ''; position: absolute; top: -50%; left: -60%; width: 40%; height: 200%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent); transform: rotate(25deg); animation: shine 3s infinite; }
+@keyframes shine { 0% { left: -60%; } 100% { left: 120%; } }
+.calc-footer { text-align: center; margin-top: 14px; font-size: 10px; color: #80cbc4; letter-spacing: .8px; font-weight: 600; line-height: 1.7; }
+.calc-top-bar { position: fixed; top: 16px; right: 16px; display: flex; gap: 8px; z-index: 20; }
+.top-btn { padding: 9px 14px; background: rgba(255,255,255,.85); backdrop-filter: blur(8px); border: 2px solid rgba(0,150,170,.3); border-radius: 8px;
+  cursor: pointer; font-family: 'Courier New', monospace; font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #006064;
+  transition: all .15s; box-shadow: 0 3px 10px rgba(0,150,170,.15); }
+.top-btn:hover { background: #fff; transform: translateY(-1px); }
+.top-btn.danger { border-color: rgba(255,80,80,.4); color: #c62828; }
+
+/* ANIM */
+#animScreen { position: fixed; inset: 0; background: #87CEEB; overflow: hidden; z-index: 20; opacity: 0; pointer-events: none; transition: opacity .6s; }
+#animScreen.visible { opacity: 1; pointer-events: auto; }
+#scene3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.anim-hud-top { position: absolute; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; z-index: 5; pointer-events: none; }
+.anim-hud-top > * { pointer-events: auto; }
+.back-btn { padding: 11px 20px; background: rgba(10,15,25,.85); backdrop-filter: blur(12px); border: 2px solid rgba(107,203,119,.5);
+  border-radius: 6px; color: #fff; font-family: 'Courier New', monospace; font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  cursor: pointer; text-shadow: 1px 1px 0 #000; box-shadow: 0 4px 20px rgba(0,0,0,.5); transition: all .15s; }
+.back-btn:hover { background: rgba(107,203,119,.25); transform: translateY(-1px); }
+.results-pill { background: rgba(10,15,25,.85); backdrop-filter: blur(12px); border: 2px solid rgba(255,217,61,.5);
+  border-radius: 8px; padding: 10px 20px; text-align: right; font-family: 'Courier New', monospace; box-shadow: 0 4px 20px rgba(0,0,0,.5); }
+.results-label { font-size: 10px; color: #FFD93D; font-weight: 800; letter-spacing: 1.5px; margin-bottom: 2px; text-shadow: 1px 1px 0 #000; }
+.results-val { font-size: 24px; color: #FFD93D; font-weight: 900; text-shadow: 2px 2px 0 #000, 0 0 20px rgba(255,217,61,.5); font-variant-numeric: tabular-nums; line-height: 1; }
+.results-unit { font-size: 10px; color: #FFD93D; opacity: .7; font-weight: 700; letter-spacing: 1px; }
+.hud-stats { position: absolute; top: 100px; left: 16px; display: flex; flex-direction: column; gap: 6px;
+  font-family: 'Courier New', monospace; z-index: 5; pointer-events: none; }
+.stat { background: rgba(10,15,25,.8); backdrop-filter: blur(8px); padding: 7px 12px; border-left: 3px solid #6BCB77;
+  border-radius: 4px; display: flex; gap: 10px; align-items: center; font-size: 11px; min-width: 160px; box-shadow: 0 2px 10px rgba(0,0,0,.4); }
+.stat-label { color: #6BCB77; font-weight: 700; letter-spacing: .5px; }
+.stat-val { margin-left: auto; color: #fff; font-weight: 800; text-shadow: 1px 1px 0 #000; font-variant-numeric: tabular-nums; }
+.stat.day-stat { border-left-color: #FFD93D; }
+.stat.day-stat .stat-label { color: #FFD93D; }
+.timeline-wrap { position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.85) 60%, rgba(0,0,0,.6) 90%, transparent 100%);
+  padding: 22px 16px 16px; z-index: 5; }
+.timeline-label { font-family: 'Courier New', monospace; font-size: 12px; color: #6BCB77; letter-spacing: 2px; font-weight: 800;
+  margin-bottom: 10px; text-shadow: 1px 1px 0 #000; display: flex; align-items: center; gap: 10px; }
+.timeline-count { color: #FFD93D; font-size: 11px; }
+.timeline-scroll { overflow-x: auto; overflow-y: hidden; padding-bottom: 4px; scrollbar-width: thin; scrollbar-color: #6BCB77 rgba(255,255,255,.1); }
+.timeline-scroll::-webkit-scrollbar { height: 6px; }
+.timeline-scroll::-webkit-scrollbar-thumb { background: #6BCB77; border-radius: 3px; }
+.timeline-track { display: flex; gap: 8px; min-height: 92px; }
+.timeline-item { flex: 0 0 auto; min-width: 82px; padding: 7px 6px; background: rgba(10,15,25,.9);
+  border: 2px solid var(--food-color, #6BCB77); border-radius: 6px; text-align: center;
+  font-family: 'Courier New', monospace; box-shadow: 0 4px 12px rgba(0,0,0,.5); transition: transform .2s, box-shadow .2s; }
+.timeline-item.new { animation: tiPop .5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+@keyframes tiPop { 0% { transform: scale(0.3) translateX(40px); opacity: 0; } 60% { transform: scale(1.15); } 100% { transform: scale(1); opacity: 1; } }
+.timeline-item.latest { box-shadow: 0 4px 12px rgba(0,0,0,.5), 0 0 20px var(--food-color, #6BCB77); transform: scale(1.05); }
+.ti-day { font-size: 9px; color: #aaa; letter-spacing: .5px; font-weight: 700; margin-bottom: 2px; }
+.ti-emojis { font-size: 16px; margin: 3px 0; line-height: 1; letter-spacing: 1px; }
+.ti-co2 { font-size: 10px; color: var(--food-color, #6BCB77); font-weight: 800; text-shadow: 0 0 6px var(--food-color, #6BCB77); font-variant-numeric: tabular-nums; }
+.timeline-empty { color: #555; font-family: 'Courier New', monospace; font-size: 12px; padding: 30px; text-align: center; }
+
+/* MODAL */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+.modal.show { display: flex; }
+.modal-content { background: linear-gradient(160deg,#101625 0%,#080c15 100%); border: 2px solid rgba(107,203,119,.4); border-radius: 8px;
+  padding: 22px; max-width: 460px; width: 100%; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 0 0 3px rgba(0,0,0,.5), 0 20px 60px rgba(0,0,0,.7); font-family: 'Courier New', monospace; color: #fff;
+  animation: modalPop .4s cubic-bezier(0.34, 1.4, 0.64, 1); }
+@keyframes modalPop { 0% { transform: scale(.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.modal h2 { font-size: 15px; color: #6BCB77; letter-spacing: 1.5px; text-shadow: 1px 1px 0 #000; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid rgba(107,203,119,.2); text-align: center; }
+.modal-close { margin-top: 16px; width: 100%; padding: 11px; font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; color: #fff; background: rgba(255,255,255,.05); border: 2px solid rgba(255,255,255,.15); border-radius: 4px; cursor: pointer; }
+.lb-row { display: flex; align-items: center; gap: 12px; padding: 9px 12px; margin-bottom: 6px; background: rgba(0,0,0,.4); border: 1px solid rgba(107,203,119,.15); border-radius: 4px; }
+.lb-row.you { border-color: #FFD93D; background: rgba(255,217,61,.1); }
+.lb-rank { flex: 0 0 28px; font-size: 13px; font-weight: 900; color: #6BCB77; text-align: center; }
+.lb-row:nth-child(1) .lb-rank { color: #FFD93D; }
+.lb-row:nth-child(2) .lb-rank { color: #C0C0C0; }
+.lb-row:nth-child(3) .lb-rank { color: #CD7F32; }
+.lb-name { flex: 1; font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lb-co2 { font-size: 12px; font-weight: 800; color: #FFD93D; font-variant-numeric: tabular-nums; }
+.lb-co2 small { color: #666; font-size: 9px; font-weight: 600; }
+.lb-empty { text-align: center; padding: 30px; color: #555; font-size: 12px; }
+.toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px); background: rgba(10,15,25,.95); border: 2px solid #FF6B6B;
+  border-radius: 4px; padding: 12px 24px; color: #fff; font-family: 'Courier New', monospace; font-size: 13px; font-weight: 700;
+  letter-spacing: 1px; box-shadow: 0 8px 30px rgba(0,0,0,.6), 0 0 30px rgba(255,107,107,.3); z-index: 500; opacity: 0; pointer-events: none;
+  transition: all .4s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@media (max-width: 500px) {
+  .calc-header h1 { font-size: 20px; }
+  .calc-card { padding: 20px 16px; }
+  .food-input-row { padding: 8px 10px; gap: 8px; }
+  .fi-emoji { font-size: 20px; }
+  .fi-name { font-size: 12px; min-width: 36px; }
+  .fi-input { font-size: 15px; padding: 7px 6px; }
+  .results-val { font-size: 18px; }
+  .results-pill { padding: 7px 14px; }
+  .hud-stats { top: 86px; left: 10px; }
+  .stat { font-size: 10px; padding: 6px 10px; min-width: 130px; }
+  .timeline-item { min-width: 70px; }
+  .ti-emojis { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">🍚</div>
+    <div class="auth-title">澳門廚餘碳排放</div>
+    <div class="auth-sub">MACAU · FOOD WASTE</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">登入</button>
+      <button class="auth-tab" data-tab="signup">註冊</button>
+    </div>
+    <form id="authForm">
+      <div class="auth-field"><label>用戶名</label><input type="text" class="auth-input" name="username" placeholder="3–20 characters" maxlength="20" autocomplete="username"></div>
+      <div class="auth-field"><label>密碼</label><input type="password" class="auth-input" name="password" placeholder="min 4 characters" maxlength="64" autocomplete="current-password"></div>
+      <button type="submit" class="auth-btn" id="authSubmit">登入</button>
+      <div class="auth-error" id="authError"></div>
+    </form>
+    <div class="auth-hint">🌱 Log in to join the leaderboard</div>
+  </div>
+</div>
+
+<div id="calcScreen">
+  <div class="calc-top-bar">
+    <button class="top-btn" id="lbBtnCalc">🏆 Leaderboard</button>
+    <button class="top-btn danger" id="logoutBtnCalc">Logout</button>
+  </div>
+  <div class="calc-wrap">
+    <div class="calc-header">
+      <h1>🌱 澳門廚餘碳排放計算器</h1>
+      <p class="subtitle">MACAU FOOD WASTE CALCULATOR</p>
+      <span class="tag" id="userTag">—</span>
+    </div>
+    <div class="calc-card">
+      <div class="food-inputs">
+        <div class="food-input-row">
+          <span class="fi-emoji">🥩</span>
+          <span class="fi-name">肉類</span>
+          <span class="fi-coef">25.09</span>
+          <input type="number" class="fi-input" id="meatInput" value="0" min="0" step="10" placeholder="0">
+          <span class="fi-unit">g/day</span>
+        </div>
+        <div class="food-input-row">
+          <span class="fi-emoji">🍚</span>
+          <span class="fi-name">米飯</span>
+          <span class="fi-coef">1.95</span>
+          <input type="number" class="fi-input" id="riceInput" value="0" min="0" step="10" placeholder="0">
+          <span class="fi-unit">g/day</span>
+        </div>
+        <div class="food-input-row">
+          <span class="fi-emoji">🥬</span>
+          <span class="fi-name">蔬菜</span>
+          <span class="fi-coef">0.45</span>
+          <input type="number" class="fi-input" id="vegInput" value="0" min="0" step="10" placeholder="0">
+          <span class="fi-unit">g/day</span>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">
+          <span class="name">每週丟棄天數</span>
+          <span class="value">每週 <span id="freqVal">0</span> 天</span>
+        </div>
+        <input type="range" id="freqInput" min="0" max="7" step="1" value="0">
+        <div class="range-marks"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span></div>
+      </div>
+      <div class="preview" id="preview">
+        <div class="pv-row"><span>🥩 肉類碳排</span><span class="pv-val" id="pvMeat">0.00 kg</span></div>
+        <div class="pv-row"><span>🍚 米飯碳排</span><span class="pv-val" id="pvRice">0.00 kg</span></div>
+        <div class="pv-row"><span>🥬 蔬菜碳排</span><span class="pv-val" id="pvVeg">0.00 kg</span></div>
+        <div class="pv-row"><span>每日總碳排</span><span class="pv-val" id="pvDaily">0.00 kg</span></div>
+        <div class="pv-row main"><span>全年總碳排</span><span class="pv-val" id="pvYearly">0.00 kg</span></div>
+        <div class="pv-row"><span>需要樹木</span><span class="pv-val" id="pvTrees">0 棵</span></div>
+      </div>
+      <button class="submit-btn" id="submitBtn">▶ 開始動畫計算</button>
+    </div>
+    <div class="calc-footer">
+      排放係數：肉類 25.09 · 米飯 1.95 · 蔬菜 0.45 kg CO₂/kg｜樹木吸收 12 kg CO₂/棵/年
+    </div>
+  </div>
+</div>
+
+<div id="animScreen">
+  <canvas id="scene3d"></canvas>
+  <div class="anim-hud-top">
+    <button class="back-btn" id="backBtn">← Back to Calculator</button>
+    <div class="results-pill">
+      <div class="results-label">▶ YEARLY CO₂</div>
+      <div class="results-val"><span id="yearlyBig">0</span><span class="results-unit"> kg</span></div>
+    </div>
+  </div>
+  <div class="hud-stats">
+    <div class="stat day-stat"><span class="stat-label">DAY</span><span class="stat-val" id="statDay">0</span></div>
+    <div class="stat"><span class="stat-label">🥩 肉類</span><span class="stat-val" id="statMeat">0 g</span></div>
+    <div class="stat"><span class="stat-label">🍚 米飯</span><span class="stat-val" id="statRice">0 g</span></div>
+    <div class="stat"><span class="stat-label">🥬 蔬菜</span><span class="stat-val" id="statVeg">0 g</span></div>
+  </div>
+  <div class="timeline-wrap">
+    <div class="timeline-label">📅 DAILY LOG <span class="timeline-count" id="timelineCount">0 days</span></div>
+    <div class="timeline-scroll" id="timelineScroll">
+      <div class="timeline-track" id="timelineTrack">
+        <div class="timeline-empty">Waiting for day 1…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="lbModal">
+  <div class="modal-content">
+    <h2>🏆 LEADERBOARD</h2>
+    <div id="lbList"><div class="lb-empty">Loading…</div></div>
+    <button class="modal-close" data-close>Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+const FOODS = {
+  meat: { name: '肉類', emoji: '🥩', coef: 25.09, colors: [0xCC3333, 0x8B2020, 0xE84848, 0xA03030], css: '#E84848' },
+  rice: { name: '米飯', emoji: '🍚', coef: 1.95,  colors: [0xFFF8E1, 0xE8DCC0, 0xF5F0DC, 0xFFF0C0], css: '#FFE066' },
+  veg:  { name: '蔬菜', emoji: '🥬', coef: 0.45,  colors: [0x6BCB77, 0x8EE09A, 0x4CAF50, 0x7BC555], css: '#6BCB77' }
+};
+const TREE_ABSORB = 12;
+const WEEKS_PER_YEAR = 52;
+
+const API = {
+  token: localStorage.getItem('token'),
+  username: localStorage.getItem('username'),
+  async req(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+    if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
+    const res = await fetch(path, { ...opts, headers });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    return data;
+  },
+  async signup(u, p) { const d = await this.req('/api/signup', { method: 'POST', body: JSON.stringify({ username: u, password: p }) }); this.token = d.token; this.username = d.username; localStorage.setItem('token', d.token); localStorage.setItem('username', d.username); return d; },
+  async login(u, p)  { const d = await this.req('/api/login',  { method: 'POST', body: JSON.stringify({ username: u, password: p }) }); this.token = d.token; this.username = d.username; localStorage.setItem('token', d.token); localStorage.setItem('username', d.username); return d; },
+  async me() { return this.req('/api/me'); },
+  async score(co2) { return this.req('/api/score', { method: 'POST', body: JSON.stringify({ co2 }) }); },
+  async lb() { return this.req('/api/leaderboard'); },
+  async logout() { try { await this.req('/api/logout', { method: 'POST' }); } catch (e) {} this.token = null; this.username = null; localStorage.removeItem('token'); localStorage.removeItem('username'); }
+};
+
+const $ = id => document.getElementById(id);
+const authScreen = $('authScreen'), calcScreen = $('calcScreen'), animScreen = $('animScreen');
+const authForm = $('authForm'), authError = $('authError'), authSubmit = $('authSubmit');
+const meatInput = $('meatInput'), riceInput = $('riceInput'), vegInput = $('vegInput');
+const freqInput = $('freqInput'), freqVal = $('freqVal'), submitBtn = $('submitBtn');
+const previewIds = { meat: $('pvMeat'), rice: $('pvRice'), veg: $('pvVeg'), daily: $('pvDaily'), yearly: $('pvYearly'), trees: $('pvTrees') };
+const yearlyBig = $('yearlyBig'), statDay = $('statDay');
+const statMeat = $('statMeat'), statRice = $('statRice'), statVeg = $('statVeg');
+const timelineTrack = $('timelineTrack'), timelineScroll = $('timelineScroll'), timelineCount = $('timelineCount');
+const backBtn = $('backBtn'), toastEl = $('toast');
+const lbModal = $('lbModal'), lbList = $('lbList');
+const userTag = $('userTag');
+
+let user = { username: null, bestCO2: null };
+
+let authMode = 'login';
+document.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    authMode = tab.dataset.tab;
+    authSubmit.textContent = authMode === 'login' ? '登入' : '註冊並進入';
+    authError.textContent = '';
+  });
+});
+
+authForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const fd = new FormData(authForm);
+  const u = (fd.get('username') || '').trim();
+  const p = fd.get('password') || '';
+  if (!u || !p) { authError.textContent = 'Please fill all fields'; return; }
+  authError.textContent = '';
+  authSubmit.textContent = '...';
+  try {
+    if (authMode === 'login') await API.login(u, p);
+    else await API.signup(u, p);
+    await enterApp();
+  } catch (err) {
+    authError.textContent = err.message;
+    authSubmit.textContent = authMode === 'login' ? '登入' : '註冊並進入';
+  }
+});
+
+async function enterApp() {
+  try {
+    const me = await API.me();
+    user.username = me.username;
+    user.bestCO2 = me.bestCO2;
+    userTag.textContent = `👤 ${me.username}` + (me.bestCO2 ? ` · best ${me.bestCO2.toFixed(2)} kg` : '');
+  } catch (e) {
+    await API.logout();
+    return;
+  }
+  authScreen.style.display = 'none';
+  calcScreen.style.display = 'flex';
+}
+
+$('logoutBtnCalc').addEventListener('click', async () => { await API.logout(); location.reload(); });
+
+function getInputs() {
+  return {
+    meat: Math.max(0, parseFloat(meatInput.value) || 0),
+    rice: Math.max(0, parseFloat(riceInput.value) || 0),
+    veg:  Math.max(0, parseFloat(vegInput.value) || 0),
+    freq: Math.max(0, parseInt(freqInput.value) || 0)
+  };
+}
+
+function updatePreview() {
+  const inp = getInputs();
+  const meatCO2 = (inp.meat / 1000) * FOODS.meat.coef;
+  const riceCO2 = (inp.rice / 1000) * FOODS.rice.coef;
+  const vegCO2  = (inp.veg  / 1000) * FOODS.veg.coef;
+  const dailyCO2 = meatCO2 + riceCO2 + vegCO2;
+  const yearlyCO2 = dailyCO2 * inp.freq * WEEKS_PER_YEAR;
+  const trees = yearlyCO2 / TREE_ABSORB;
+
+  previewIds.meat.textContent = meatCO2.toFixed(2) + ' kg';
+  previewIds.rice.textContent = riceCO2.toFixed(2) + ' kg';
+  previewIds.veg.textContent = vegCO2.toFixed(2) + ' kg';
+  previewIds.daily.textContent = dailyCO2.toFixed(3) + ' kg';
+  previewIds.yearly.textContent = yearlyCO2.toFixed(2) + ' kg';
+  previewIds.trees.textContent = Math.ceil(trees) + ' 棵';
+
+  freqVal.textContent = inp.freq;
+  freqInput.style.setProperty('--fill', (inp.freq / 7) * 100 + '%');
+}
+
+[meatInput, riceInput, vegInput, freqInput].forEach(el => el.addEventListener('input', updatePreview));
+
+let animConfig = null;
+
+submitBtn.addEventListener('click', () => {
+  const inp = getInputs();
+  const totalGrams = inp.meat + inp.rice + inp.veg;
+  if (totalGrams === 0 || inp.freq === 0) { showToast('⚠ Please enter food grams and days'); return; }
+
+  const dailyCO2 = (inp.meat/1000)*FOODS.meat.coef + (inp.rice/1000)*FOODS.rice.coef + (inp.veg/1000)*FOODS.veg.coef;
+  const yearlyCO2 = dailyCO2 * inp.freq * WEEKS_PER_YEAR;
+
+  animConfig = {
+    meat: inp.meat, rice: inp.rice, veg: inp.veg,
+    dailyCO2, yearlyCO2,
+    foods: ['meat', 'rice', 'veg'].filter(f => inp[f] > 0)
+  };
+
+  yearlyBig.textContent = yearlyCO2.toFixed(0);
+  statMeat.textContent = inp.meat + ' g';
+  statRice.textContent = inp.rice + ' g';
+  statVeg.textContent = inp.veg + ' g';
+  statDay.textContent = '0';
+  throwDay = 0;
+  timelineTrack.innerHTML = '<div class="timeline-empty">Waiting for day 1…</div>';
+  timelineCount.textContent = '0 days';
+
+  enterAnim();
+
+  API.score(yearlyCO2).then(r => {
+    if (r.newBest) {
+      user.bestCO2 = r.best;
+      userTag.textContent = `👤 ${user.username} · best ${r.best.toFixed(2)} kg`;
+      showToast(`🏆 New record! ${r.best.toFixed(2)} kg`);
+    }
+  }).catch(() => {});
+});
+
+function enterAnim() {
+  calcScreen.classList.add('fade-out');
+  animScreen.classList.add('visible');
+  if (!worldInited) { initWorld(); worldInited = true; }
+  animRunning = true;
+  cycleStart = performance.now();
+  dayCO2Assigned = false;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      resizeRenderer();
+      if (!animLoopRunning) { animLoopRunning = true; animate(); }
+    });
+  });
+}
+
+function exitAnim() {
+  animScreen.classList.remove('visible');
+  calcScreen.classList.remove('fade-out');
+  animRunning = false;
+  animLoopRunning = false;
+  if (heldFood && armR) { armR.userData.hand.remove(heldFood); heldFood = null; }
+  if (flyingTrash) { scene.remove(flyingTrash.mesh); flyingTrash = null; }
+  updatePreview();
+}
+
+backBtn.addEventListener('click', exitAnim);
+
+let renderer, scene, camera;
+let character, armL, armR, legL, legR, head, hair, hairFringe, eyeL, eyeR, mouth, torso;
+let bin;
+let worldInited = false, animRunning = false, animLoopRunning = false;
+let cycleStart = 0;
+let flyingTrash = null, heldFood = null;
+let throwDay = 0, dayCO2Assigned = false, currentDayFoods = [], currentDayCO2 = 0, throwIdx = -1;
+
+const HOME_X = -3.5, BIN_X = 1.8;
+const easeInOut = t => t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2)/2;
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function initWorld() {
+  const canvas = $('scene3d');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFShadowMap;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87CEEB);
+  scene.fog = new THREE.Fog(0x87CEEB, 30, 80);
+
+  camera = new THREE.PerspectiveCamera(50, 1, 0.1, 200);
+  camera.position.set(-2, 6, 14);
+  camera.lookAt(0, 1.5, 0);
+
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x88aa66, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+  sun.position.set(-8, 16, 8);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -20; sun.shadow.camera.right = 20;
+  sun.shadow.camera.top = 20; sun.shadow.camera.bottom = -20;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 50;
+  sun.shadow.bias = -0.0004;
+  scene.add(sun);
+
+  const texGrassTop  = mkTex('#7CBD56', ['#6BAF4A','#8CCF65','#5C9F3E','#7BC555'], 90);
+  const texGrassSide = mkGrassSideTex();
+  const texDirt      = mkTex('#8B5A2B', ['#7A4F26','#9A6532','#6B4520','#A07040'], 140);
+  const texWood      = mkWoodTex();
+  const texLeaf      = mkTex('#3F7A2E', ['#4A8C35','#356B25','#5A9B42','#2E5B1E'], 130);
+  const texBin       = mkBinTex();
+  const texSkin      = mkTex('#E8B98A', ['#DDA878','#F0C79A','#C99568'], 50);
+  const texPants     = mkTex('#2C5D8A', ['#24507A','#356A98','#1E4468'], 40);
+
+  const mGrassTop  = new THREE.MeshLambertMaterial({ map: texGrassTop });
+  const mGrassSide = new THREE.MeshLambertMaterial({ map: texGrassSide });
+  const mDirt      = new THREE.MeshLambertMaterial({ map: texDirt });
+  const mWood      = new THREE.MeshLambertMaterial({ map: texWood });
+  const mLeaf      = new THREE.MeshLambertMaterial({ map: texLeaf });
+  const mBin       = new THREE.MeshLambertMaterial({ map: texBin });
+  const mSkin      = new THREE.MeshLambertMaterial({ map: texSkin });
+  const mShirt     = new THREE.MeshLambertMaterial({ color: 0x4DD0E1 });
+  const mPants     = new THREE.MeshLambertMaterial({ map: texPants });
+  const mShoe      = new THREE.MeshLambertMaterial({ color: 0x222222 });
+  const mHair      = new THREE.MeshLambertMaterial({ color: 0x3A2A1A });
+  const mEye       = new THREE.MeshBasicMaterial({ color: 0x000000 });
+  const mMouth     = new THREE.MeshBasicMaterial({ color: 0x7A3030 });
+
+  const W = 26, D = 18;
+  for (let x = -W/2; x < W/2; x++)
+    for (let z = -D/2; z < D/2; z++) {
+      const g = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), [mGrassSide,mGrassSide,mGrassTop,mDirt,mGrassSide,mGrassSide]);
+      g.position.set(x+0.5, -0.5, z+0.5); g.receiveShadow = true; scene.add(g);
+    }
+  for (let dep = 0; dep < 3; dep++)
+    for (let x = -W/2; x < W/2; x++)
+      for (let z = -D/2; z < D/2; z++) {
+        const d = new THREE.Mesh(new THREE.BoxGeometry(1,1,1), mDirt);
+        d.position.set(x+0.5, -1.5-dep, z+0.5); d.receiveShadow = true; scene.add(d);
+      }
+
+  [[-9,-3],[10,-4],[-10,4],[11,5],[-8,6],[9,-6]].forEach(([x,z]) => scene.add(makeTree(x, z, mWood, mLeaf)));
+
+  bin = new THREE.Group();
+  const binBody = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.6, 1.3), mBin);
+  binBody.position.y = 0.8; binBody.castShadow = true; binBody.receiveShadow = true; bin.add(binBody);
+  const rim = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.15, 1.45), new THREE.MeshLambertMaterial({ color: 0x1A7F8F }));
+  rim.position.y = 1.68; rim.castShadow = true; bin.add(rim);
+  const inner = new THREE.Mesh(new THREE.BoxGeometry(1.25, 0.05, 1.25), new THREE.MeshBasicMaterial({ color: 0x050d10 }));
+  inner.position.y = 1.75; bin.add(inner);
+  const stripeMat = new THREE.MeshLambertMaterial({ color: 0xFFD93D });
+  [[0.66,0],[-0.66,0],[0,0.66],[0,-0.66]].forEach(([ox, oz]) => {
+    for (let y of [1.15, 0.75]) {
+      const s = new THREE.Mesh(new THREE.BoxGeometry(ox !== 0 ? 0.02 : 0.7, 0.18, oz !== 0 ? 0.02 : 0.7), stripeMat);
+      s.position.set(ox, y, oz); bin.add(s);
+    }
+  });
+  bin.position.set(3, 0, 0);
+  scene.add(bin);
+
+  character = new THREE.Group();
+  torso = new THREE.Mesh(new THREE.BoxGeometry(0.75, 0.9, 0.4), mShirt);
+  torso.position.y = 1.2; torso.castShadow = true; character.add(torso);
+  head = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.65, 0.65), mSkin);
+  head.position.y = 2.0; head.castShadow = true; character.add(head);
+  hair = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.18, 0.68), mHair);
+  hair.position.y = 2.32; hair.castShadow = true; character.add(hair);
+  hairFringe = new THREE.Mesh(new THREE.BoxGeometry(0.68, 0.12, 0.18), mHair);
+  hairFringe.position.set(0, 2.16, 0.26); character.add(hairFringe);
+  const eyeGeo = new THREE.BoxGeometry(0.1, 0.13, 0.03);
+  eyeL = new THREE.Mesh(eyeGeo, mEye); eyeL.position.set(-0.15, 2.05, 0.33); character.add(eyeL);
+  eyeR = new THREE.Mesh(eyeGeo, mEye); eyeR.position.set( 0.15, 2.05, 0.33); character.add(eyeR);
+  mouth = new THREE.Mesh(new THREE.BoxGeometry(0.17, 0.05, 0.02), mMouth);
+  mouth.position.set(0, 1.86, 0.33); character.add(mouth);
+
+  function makeArm(side) {
+    const g = new THREE.Group();
+    const arm = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.9, 0.26), mShirt);
+    arm.position.y = -0.45; arm.castShadow = true; g.add(arm);
+    const h = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.2, 0.26), mSkin);
+    h.position.y = -0.98; h.castShadow = true; g.add(h);
+    g.position.set(side * 0.5, 1.55, 0);
+    g.userData.hand = h;
+    return g;
+  }
+  armL = makeArm(-1); armR = makeArm(1);
+  character.add(armL); character.add(armR);
+
+  function makeLeg(side) {
+    const g = new THREE.Group();
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.75, 0.26), mPants);
+    leg.position.y = -0.38; leg.castShadow = true; g.add(leg);
+    const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.16, 0.34), mShoe);
+    shoe.position.set(0, -0.82, 0.04); shoe.castShadow = true; g.add(shoe);
+    g.position.set(side * 0.19, 0.75, 0);
+    return g;
+  }
+  legL = makeLeg(-1); legR = makeLeg(1);
+  character.add(legL); character.add(legR);
+
+  character.position.set(HOME_X, 0, 0);
+  character.rotation.y = Math.PI / 2;
+  scene.add(character);
+
+  window.addEventListener('resize', resizeRenderer);
+}
+
+function mkTex(base, shades, count) {
+  const c = document.createElement('canvas'); c.width = c.height = 16;
+  const x = c.getContext('2d');
+  x.fillStyle = base; x.fillRect(0, 0, 16, 16);
+  for (let i = 0; i < count; i++) { x.fillStyle = shades[i%shades.length]; x.fillRect(Math.random()*16|0, Math.random()*16|0, 1, 1); }
+  const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter;
+  return t;
+}
+function mkGrassSideTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 16;
+  const x = c.getContext('2d');
+  x.fillStyle = '#8B5A2B'; x.fillRect(0,0,16,16);
+  const sh = ['#7A4F26','#9A6532','#6B4520','#A07040'];
+  for (let i=0;i<90;i++){x.fillStyle=sh[i%4];x.fillRect(Math.random()*16|0,Math.random()*16|0,1,1);}
+  x.fillStyle = '#7CBD56'; x.fillRect(0,0,16,4);
+  const gs = ['#6BAF4A','#8CCF65','#5C9F3E'];
+  for (let i=0;i<40;i++){x.fillStyle=gs[i%3];x.fillRect(Math.random()*16|0,Math.random()*4|0,1,1);}
+  for (let i=0;i<16;i++) if (Math.random()>.5){x.fillStyle='#5C9F3E';x.fillRect(i,4,1,1);}
+  const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter;
+  return t;
+}
+function mkWoodTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 16;
+  const x = c.getContext('2d');
+  x.fillStyle = '#6B4520'; x.fillRect(0,0,16,16);
+  for (let i=0;i<4;i++){x.fillStyle=i%2?'#5A3818':'#7B5228';x.fillRect(0,i*4,16,2);}
+  for (let i=0;i<60;i++){x.fillStyle=['#5A3818','#7B5228','#4A2E10'][i%3];x.fillRect(Math.random()*16|0,Math.random()*16|0,1,1);}
+  const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter;
+  return t;
+}
+function mkBinTex() {
+  const c = document.createElement('canvas'); c.width = c.height = 16;
+  const x = c.getContext('2d');
+  x.fillStyle = '#2FB3C4'; x.fillRect(0,0,16,16);
+  for (let i=0;i<16;i+=4){x.fillStyle='#1A7F8F';x.fillRect(i,0,1,16);}
+  const sh = ['#3FC3D4','#25A3B4','#44D0E0'];
+  for (let i=0;i<60;i++){x.fillStyle=sh[i%3];x.fillRect(Math.random()*16|0,Math.random()*16|0,1,1);}
+  const t = new THREE.CanvasTexture(c); t.magFilter = THREE.NearestFilter; t.minFilter = THREE.NearestFilter;
+  return t;
+}
+function makeTree(x, z, wood, leaf) {
+  const g = new THREE.Group();
+  const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.8, 0.6), wood);
+  trunk.position.y = 0.9; trunk.castShadow = true; g.add(trunk);
+  const layout = [
+    [-0.5,2.1,-0.5],[0,2.1,-0.5],[0.5,2.1,-0.5],[-0.5,2.1,0],[0.5,2.1,0],[-0.5,2.1,0.5],[0,2.1,0.5],[0.5,2.1,0.5],
+    [-0.5,2.6,-0.5],[0,2.6,-0.5],[0.5,2.6,-0.5],[-0.5,2.6,0],[0,2.6,0],[0.5,2.6,0],[-0.5,2.6,0.5],[0,2.6,0.5],[0.5,2.6,0.5],
+    [-0.5,3.1,0],[0,3.1,-0.5],[0.5,3.1,0],[0,3.1,0.5],[0,3.1,0],[0,3.6,0]
+  ];
+  layout.forEach(([lx,ly,lz]) => { const b = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.5,0.5), leaf); b.position.set(lx,ly,lz); b.castShadow = true; g.add(b); });
+  g.position.set(x, 0, z);
+  return g;
+}
+
+function makeTrashMesh(foodKey) {
+  const food = FOODS[foodKey];
+  const color = food.colors[Math.floor(Math.random() * food.colors.length)];
+  const mat = new THREE.MeshLambertMaterial({ color });
+  const g = new THREE.Group();
+  const size = 0.28 + Math.random() * 0.08;
+  if (foodKey === 'meat') {
+    const box = new THREE.Mesh(new THREE.BoxGeometry(size*1.2, size, size*1.2), mat);
+    box.castShadow = true; g.add(box);
+    const bone = new THREE.Mesh(new THREE.BoxGeometry(size*0.3, size*0.3, size*0.9), new THREE.MeshLambertMaterial({ color: 0xFFFFFF }));
+    bone.position.set(0, size*0.6, 0); g.add(bone);
+  } else if (foodKey === 'veg') {
+    const box = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
+    box.castShadow = true; g.add(box);
+    const leaf = new THREE.Mesh(new THREE.BoxGeometry(size*0.6, size*0.15, size*0.5), new THREE.MeshLambertMaterial({ color: 0x4CAF50 }));
+    leaf.position.set(0, size*0.6, 0); leaf.rotation.y = Math.PI/4; g.add(leaf);
+  } else {
+    const box = new THREE.Mesh(new THREE.BoxGeometry(size, size, size), mat);
+    box.castShadow = true; g.add(box);
+    const bowl = new THREE.Mesh(new THREE.BoxGeometry(size*0.9, size*0.15, size*0.9), new THREE.MeshLambertMaterial({ color: 0x707070 }));
+    bowl.position.y = -size*0.55; g.add(bowl);
+  }
+  return g;
+}
+
+function resizeRenderer() {
+  if (!renderer) return;
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+
+function addTimelineItem(day, foods, co2) {
+  const empty = timelineTrack.querySelector('.timeline-empty');
+  if (empty) empty.remove();
+  const prev = timelineTrack.querySelector('.timeline-item.latest');
+  if (prev) prev.classList.remove('latest');
+  const color = FOODS[foods[0]].css;
+  const emojis = foods.map(f => FOODS[f].emoji).join('');
+  const item = document.createElement('div');
+  item.className = 'timeline-item new latest';
+  item.style.setProperty('--food-color', color);
+  item.innerHTML = `<div class="ti-day">DAY ${day}</div><div class="ti-emojis">${emojis}</div><div class="ti-co2">${co2.toFixed(2)} kg</div>`;
+  timelineTrack.appendChild(item);
+  while (timelineTrack.children.length > 40) timelineTrack.removeChild(timelineTrack.firstChild);
+  setTimeout(() => item.classList.remove('new'), 600);
+  requestAnimationFrame(() => { timelineScroll.scrollLeft = timelineScroll.scrollWidth; });
+  timelineCount.textContent = `${day} days`;
+}
+
+let lastT = performance.now();
+
+function startNewDay() {
+  currentDayFoods = [...animConfig.foods].sort(() => Math.random() - 0.5);
+  currentDayCO2 = 0;
+  animConfig.foods.forEach(f => {
+    const base = (animConfig[f] / 1000) * FOODS[f].coef;
+    currentDayCO2 += base * (0.85 + Math.random() * 0.3);
+  });
+  throwIdx = -1;
+}
+
+function animate() {
+  if (!animLoopRunning) return;
+  requestAnimationFrame(animate);
+  const now = performance.now();
+  const dt = Math.min((now - lastT) / 1000, 0.05);
+  lastT = now;
+  if (!animRunning || !character) { renderer.render(scene, camera); return; }
+
+  const WALK = 900, THROW = 700, RETURN = 900, PAUSE = 500;
+  const numThrows = animConfig.foods.length;
+  const throwPhase = numThrows * THROW;
+  const cycleDur = WALK + throwPhase + RETURN + PAUSE;
+
+  if (!dayCO2Assigned) { startNewDay(); dayCO2Assigned = true; }
+
+  const elapsed = (now - cycleStart) % cycleDur;
+  let charX = HOME_X, legSwing = 0, armSwing = 0, armRRotX = 0, headBob = 0;
+
+  if (elapsed < WALK) {
+    const k = elapsed / WALK;
+    charX = lerp(HOME_X, BIN_X - 0.6, easeInOut(k));
+    const ph = k * 3 * Math.PI;
+    legSwing = Math.sin(ph) * 1.05;
+    armSwing = Math.sin(ph) * 0.8;
+    headBob = Math.abs(Math.sin(ph)) * 0.05;
+  } else if (elapsed < WALK + throwPhase) {
+    charX = BIN_X - 0.6;
+    const throwElapsed = elapsed - WALK;
+    const idx = Math.floor(throwElapsed / THROW);
+    const prog = (throwElapsed % THROW) / THROW;
+    if (idx !== throwIdx) {
+      throwIdx = idx;
+      if (heldFood) { armR.userData.hand.remove(heldFood); heldFood = null; }
+    }
+    if (prog < 0.35) {
+      armRRotX = -easeInOut(prog / 0.35) * 2.4;
+      if (!heldFood && currentDayFoods[idx]) {
+        heldFood = makeTrashMesh(currentDayFoods[idx]);
+        heldFood.scale.set(0.55, 0.55, 0.55);
+        heldFood.position.set(0, -0.2, 0);
+        armR.userData.hand.add(heldFood);
+      }
+    } else if (prog < 0.75) {
+      armRRotX = -2.4 + easeInOut((prog - 0.35) / 0.4) * 3.6;
+      if (prog > 0.55 && heldFood) {
+        armR.userData.hand.remove(heldFood);
+        heldFood = null;
+        launchTrash(currentDayFoods[idx]);
+      }
+    } else {
+      armRRotX = 1.2;
+    }
+  } else if (elapsed < WALK + throwPhase + RETURN) {
+    const backElapsed = elapsed - (WALK + throwPhase);
+    const k = backElapsed / RETURN;
+    charX = lerp(BIN_X - 0.6, HOME_X, easeInOut(k));
+    const ph = k * 3 * Math.PI;
+    legSwing = Math.sin(ph) * 1.05;
+    armSwing = Math.sin(ph) * 0.8;
+    headBob = Math.abs(Math.sin(ph)) * 0.05;
+  }
+
+  character.position.x = charX;
+  legL.rotation.x = legSwing;
+  legR.rotation.x = -legSwing;
+  armL.rotation.x = -armSwing;
+  armR.rotation.x = armSwing + armRRotX;
+  head.position.y = 2.0 + headBob;
+  hair.position.y = 2.32 + headBob;
+  hairFringe.position.y = 2.16 + headBob;
+  eyeL.position.y = 2.05 + headBob;
+  eyeR.position.y = 2.05 + headBob;
+  mouth.position.y = 1.86 + headBob;
+  torso.position.y = 1.2 + headBob * 0.4;
+
+  if (flyingTrash) {
+    flyingTrash.t += dt;
+    const k = Math.min(flyingTrash.t / flyingTrash.dur, 1);
+    const start = flyingTrash.start, end = flyingTrash.end;
+    const mx = lerp(start.x, end.x, k);
+    const mz = lerp(start.z, end.z, k);
+    const baseY = lerp(start.y, end.y, k);
+    const arcY = Math.sin(k * Math.PI) * flyingTrash.height;
+    flyingTrash.mesh.position.set(mx, baseY + arcY, mz);
+    flyingTrash.mesh.rotation.x += dt * 10;
+    flyingTrash.mesh.rotation.z += dt * 8;
+    if (k >= 1) { scene.remove(flyingTrash.mesh); flyingTrash = null; }
+  }
+
+  renderer.render(scene, camera);
+}
+
+function launchTrash(foodKey) {
+  const handWorld = new THREE.Vector3();
+  armR.userData.hand.getWorldPosition(handWorld);
+  const mesh = makeTrashMesh(foodKey);
+  mesh.position.copy(handWorld);
+  scene.add(mesh);
+  flyingTrash = { mesh, start: handWorld.clone(), end: new THREE.Vector3(3, 1.85, 0), t: 0, dur: 0.7, height: 1.6 };
+}
+
+setInterval(() => {
+  if (!animRunning || !animConfig) return;
+  const now = performance.now();
+  const WALK = 900, THROW = 700, RETURN = 900, PAUSE = 500;
+  const cycleDur = WALK + animConfig.foods.length * THROW + RETURN + PAUSE;
+  if ((now - cycleStart) >= cycleDur) {
+    throwDay++;
+    statDay.textContent = throwDay;
+    addTimelineItem(throwDay, currentDayFoods, currentDayCO2);
+    cycleStart = now;
+    dayCO2Assigned = false;
+    if (heldFood && armR) { armR.userData.hand.remove(heldFood); heldFood = null; }
+  }
+}, 200);
+
+$('lbBtnCalc').addEventListener('click', async () => {
+  lbModal.classList.add('show');
+  lbList.innerHTML = '<div class="lb-empty">Loading…</div>';
+  try {
+    const data = await API.lb();
+    if (!data.length) { lbList.innerHTML = '<div class="lb-empty">No records yet. Be the first!</div>'; return; }
+    lbList.innerHTML = '';
+    data.forEach((row, i) => {
+      const isYou = row.username === user.username;
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      const div = document.createElement('div');
+      div.className = 'lb-row' + (isYou ? ' you' : '');
+      div.innerHTML = `<div class="lb-rank">${medal}</div><div class="lb-name">${escapeHtml(row.username)}${isYou ? ' (you)' : ''}</div><div class="lb-co2">${row.co2.toFixed(2)} <small>kg/yr</small></div>`;
+      lbList.appendChild(div);
+    });
+  } catch (e) { lbList.innerHTML = '<div class="lb-empty">Failed to load</div>'; }
+});
+
+document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('.modal').classList.remove('show')));
+lbModal.addEventListener('click', e => { if (e.target === lbModal) lbModal.classList.remove('show'); });
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastEl._t);
+  toastEl._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]);
+}
+
+(async function boot() {
+  if (API.token) { try { await enterApp(); } catch (e) { await API.logout(); } }
+  updatePreview();
+})();
+</script>
+
+</body>
+</html>

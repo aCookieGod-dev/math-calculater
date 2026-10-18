@@ -1,0 +1,13 @@
+{
+  "name": "macau-food-waste",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.9.0",
+    "bcryptjs": "^2.4.3"
+  }
+}
