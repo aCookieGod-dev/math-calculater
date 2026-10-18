@@ -8,39 +8,39 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { width: 100%; height: 100%; overflow: hidden; font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', sans-serif; }
 
-/* AUTH */
+/* AUTH - BLUE THEME */
 #authScreen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
-  background: radial-gradient(ellipse at 30% 20%, rgba(220,40,40,.35) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 80%, rgba(180,20,20,.3) 0%, transparent 50%),
-              linear-gradient(160deg, #150406 0%, #22060a 50%, #0a0203 100%);
+  background: radial-gradient(ellipse at 30% 20%, rgba(40,100,220,.35) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(20,70,180,.3) 0%, transparent 50%),
+              linear-gradient(160deg, #040915 0%, #060d22 50%, #02040a 100%);
   z-index: 100; padding: 20px; color: #fff; }
 .auth-card { position: relative; width: 100%; max-width: 400px;
-  background: linear-gradient(160deg, rgba(30,8,10,.95) 0%, rgba(20,5,8,.95) 100%);
-  border: 1px solid rgba(255,60,60,.3); border-radius: 20px; padding: 36px 30px 30px;
-  box-shadow: 0 0 0 1px rgba(255,100,100,.1), 0 20px 60px rgba(255,40,40,.25), 0 0 100px rgba(200,20,20,.15); }
+  background: linear-gradient(160deg, rgba(8,15,30,.95) 0%, rgba(5,10,20,.95) 100%);
+  border: 1px solid rgba(60,130,255,.3); border-radius: 20px; padding: 36px 30px 30px;
+  box-shadow: 0 0 0 1px rgba(100,160,255,.1), 0 20px 60px rgba(40,100,220,.25), 0 0 100px rgba(20,60,180,.15); }
 .auth-card::before { content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 3px; border-radius: 20px 20px 0 0;
-  background: linear-gradient(90deg, transparent, #ff3b3b, #ff6b6b, #ff3b3b, transparent); background-size: 200% 100%; animation: borderSweep 4s linear infinite; }
+  background: linear-gradient(90deg, transparent, #3b82f6, #60a5fa, #3b82f6, transparent); background-size: 200% 100%; animation: borderSweep 4s linear infinite; }
 @keyframes borderSweep { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-.auth-logo { text-align: center; font-size: 42px; margin-bottom: 6px; filter: drop-shadow(0 0 20px rgba(255,60,60,.7)); animation: logoFloat 3s ease-in-out infinite; }
+.auth-logo { text-align: center; font-size: 42px; margin-bottom: 6px; filter: drop-shadow(0 0 20px rgba(60,130,255,.7)); animation: logoFloat 3s ease-in-out infinite; }
 @keyframes logoFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-.auth-title { text-align: center; font-size: 22px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; text-shadow: 0 0 20px rgba(255,60,60,.6); }
-.auth-sub { text-align: center; font-size: 11px; color: #ff6b6b; letter-spacing: 3px; font-weight: 700; margin-bottom: 24px; opacity: .8; }
-.auth-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: rgba(0,0,0,.4); padding: 4px; border-radius: 12px; border: 1px solid rgba(255,60,60,.15); }
-.auth-tab { flex: 1; padding: 10px; font-family: inherit; font-size: 13px; font-weight: 700; color: #aa6666; background: transparent; border: none; border-radius: 8px; cursor: pointer; transition: all .2s; }
-.auth-tab.active { background: linear-gradient(180deg, #ff3b3b 0%, #c41e1e 100%); color: #fff; box-shadow: 0 0 20px rgba(255,60,60,.5); }
+.auth-title { text-align: center; font-size: 22px; font-weight: 800; letter-spacing: 1px; margin-bottom: 4px; text-shadow: 0 0 20px rgba(60,130,255,.6); }
+.auth-sub { text-align: center; font-size: 11px; color: #60a5fa; letter-spacing: 3px; font-weight: 700; margin-bottom: 24px; opacity: .8; }
+.auth-tabs { display: flex; gap: 6px; margin-bottom: 20px; background: rgba(0,0,0,.4); padding: 4px; border-radius: 12px; border: 1px solid rgba(60,130,255,.15); }
+.auth-tab { flex: 1; padding: 10px; font-family: inherit; font-size: 13px; font-weight: 700; color: #6688aa; background: transparent; border: none; border-radius: 8px; cursor: pointer; transition: all .2s; }
+.auth-tab.active { background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); color: #fff; box-shadow: 0 0 20px rgba(60,130,255,.5); }
 .auth-field { margin-bottom: 14px; }
-.auth-field label { display: block; font-size: 11px; font-weight: 700; color: #ff6b6b; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
-.auth-input { width: 100%; padding: 13px 15px; font-size: 15px; font-family: inherit; color: #fff; background: rgba(0,0,0,.5); border: 1px solid rgba(255,60,60,.3); border-radius: 10px; outline: none; transition: all .2s; }
-.auth-input:focus { border-color: #ff3b3b; background: rgba(0,0,0,.7); box-shadow: 0 0 0 3px rgba(255,60,60,.15); }
-.auth-input::placeholder { color: #664444; }
+.auth-field label { display: block; font-size: 11px; font-weight: 700; color: #60a5fa; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.auth-input { width: 100%; padding: 13px 15px; font-size: 15px; font-family: inherit; color: #fff; background: rgba(0,0,0,.5); border: 1px solid rgba(60,130,255,.3); border-radius: 10px; outline: none; transition: all .2s; }
+.auth-input:focus { border-color: #3b82f6; background: rgba(0,0,0,.7); box-shadow: 0 0 0 3px rgba(60,130,255,.15); }
+.auth-input::placeholder { color: #445566; }
 .auth-btn { width: 100%; padding: 14px; margin-top: 6px; font-family: inherit; font-size: 14px; font-weight: 800; letter-spacing: 2px; color: #fff;
-  background: linear-gradient(180deg, #ff3b3b 0%, #b81818 100%); border: none; border-radius: 12px; cursor: pointer;
-  box-shadow: 0 6px 0 #6b0f0f, 0 8px 20px rgba(255,40,40,.4); transition: all .1s; }
-.auth-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #6b0f0f; }
+  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%); border: none; border-radius: 12px; cursor: pointer;
+  box-shadow: 0 6px 0 #0f2d6b, 0 8px 20px rgba(40,100,220,.4); transition: all .1s; }
+.auth-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 #0f2d6b; }
 .auth-error { min-height: 20px; margin-top: 10px; font-size: 12px; color: #ff5555; text-align: center; font-weight: 600; }
-.auth-hint { text-align: center; margin-top: 14px; font-size: 10px; color: #553333; letter-spacing: 1px; }
+.auth-hint { text-align: center; margin-top: 14px; font-size: 10px; color: #334455; letter-spacing: 1px; }
 
-/* CALC */
+/* CALCULATOR */
 #calcScreen { position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
   background: linear-gradient(160deg, #e0f7fa 0%, #b2ebf2 45%, #80deea 100%);
   padding: 20px; overflow-y: auto; z-index: 10; color: #1a3a3a; transition: opacity .5s; }
@@ -90,7 +90,7 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 .top-btn:hover { background: #fff; transform: translateY(-1px); }
 .top-btn.danger { border-color: rgba(255,80,80,.4); color: #c62828; }
 
-/* ANIM */
+/* ANIMATION SCREEN */
 #animScreen { position: fixed; inset: 0; background: #87CEEB; overflow: hidden; z-index: 20; opacity: 0; pointer-events: none; transition: opacity .6s; }
 #animScreen.visible { opacity: 1; pointer-events: auto; }
 #scene3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -134,7 +134,7 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 .ti-co2 { font-size: 10px; color: var(--food-color, #6BCB77); font-weight: 800; text-shadow: 0 0 6px var(--food-color, #6BCB77); font-variant-numeric: tabular-nums; }
 .timeline-empty { color: #555; font-family: 'Courier New', monospace; font-size: 12px; padding: 30px; text-align: center; }
 
-/* MODAL */
+/* MODAL & TOAST */
 .modal { position: fixed; inset: 0; background: rgba(0,0,0,.85); backdrop-filter: blur(6px); display: none; align-items: center; justify-content: center; z-index: 200; padding: 20px; }
 .modal.show { display: flex; }
 .modal-content { background: linear-gradient(160deg,#101625 0%,#080c15 100%); border: 2px solid rgba(107,203,119,.4); border-radius: 8px;
@@ -188,19 +188,19 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
       <button class="auth-tab" data-tab="signup">註冊</button>
     </div>
     <form id="authForm">
-      <div class="auth-field"><label>用戶名</label><input type="text" class="auth-input" name="username" placeholder="3–20 characters" maxlength="20" autocomplete="username"></div>
-      <div class="auth-field"><label>密碼</label><input type="password" class="auth-input" name="password" placeholder="min 4 characters" maxlength="64" autocomplete="current-password"></div>
+      <div class="auth-field"><label>用戶名</label><input type="text" class="auth-input" name="username" placeholder="3–20 字元" maxlength="20" autocomplete="username"></div>
+      <div class="auth-field"><label>密碼</label><input type="password" class="auth-input" name="password" placeholder="至少 4 字元" maxlength="64" autocomplete="current-password"></div>
       <button type="submit" class="auth-btn" id="authSubmit">登入</button>
       <div class="auth-error" id="authError"></div>
     </form>
-    <div class="auth-hint">🌱 Log in to join the leaderboard</div>
+    <div class="auth-hint">🌱 登入後即可參與排行榜</div>
   </div>
 </div>
 
 <div id="calcScreen">
   <div class="calc-top-bar">
-    <button class="top-btn" id="lbBtnCalc">🏆 Leaderboard</button>
-    <button class="top-btn danger" id="logoutBtnCalc">Logout</button>
+    <button class="top-btn" id="lbBtnCalc">🏆 排行榜</button>
+    <button class="top-btn danger" id="logoutBtnCalc">登出</button>
   </div>
   <div class="calc-wrap">
     <div class="calc-header">
@@ -215,21 +215,21 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
           <span class="fi-name">肉類</span>
           <span class="fi-coef">25.09</span>
           <input type="number" class="fi-input" id="meatInput" value="0" min="0" step="10" placeholder="0">
-          <span class="fi-unit">g/day</span>
+          <span class="fi-unit">g/日</span>
         </div>
         <div class="food-input-row">
           <span class="fi-emoji">🍚</span>
           <span class="fi-name">米飯</span>
           <span class="fi-coef">1.95</span>
           <input type="number" class="fi-input" id="riceInput" value="0" min="0" step="10" placeholder="0">
-          <span class="fi-unit">g/day</span>
+          <span class="fi-unit">g/日</span>
         </div>
         <div class="food-input-row">
           <span class="fi-emoji">🥬</span>
           <span class="fi-name">蔬菜</span>
           <span class="fi-coef">0.45</span>
           <input type="number" class="fi-input" id="vegInput" value="0" min="0" step="10" placeholder="0">
-          <span class="fi-unit">g/day</span>
+          <span class="fi-unit">g/日</span>
         </div>
       </div>
       <div class="field">
@@ -259,9 +259,9 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 <div id="animScreen">
   <canvas id="scene3d"></canvas>
   <div class="anim-hud-top">
-    <button class="back-btn" id="backBtn">← Back to Calculator</button>
+    <button class="back-btn" id="backBtn">← 返回計算器</button>
     <div class="results-pill">
-      <div class="results-label">▶ YEARLY CO₂</div>
+      <div class="results-label">▶ 全年碳排放</div>
       <div class="results-val"><span id="yearlyBig">0</span><span class="results-unit"> kg</span></div>
     </div>
   </div>
@@ -272,10 +272,10 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
     <div class="stat"><span class="stat-label">🥬 蔬菜</span><span class="stat-val" id="statVeg">0 g</span></div>
   </div>
   <div class="timeline-wrap">
-    <div class="timeline-label">📅 DAILY LOG <span class="timeline-count" id="timelineCount">0 days</span></div>
+    <div class="timeline-label">📅 每日丟棄紀錄 <span class="timeline-count" id="timelineCount">0 天</span></div>
     <div class="timeline-scroll" id="timelineScroll">
       <div class="timeline-track" id="timelineTrack">
-        <div class="timeline-empty">Waiting for day 1…</div>
+        <div class="timeline-empty">等待第一天…</div>
       </div>
     </div>
   </div>
@@ -283,9 +283,9 @@ input[type="range"]::-moz-range-thumb { width: 24px; height: 24px; border-radius
 
 <div class="modal" id="lbModal">
   <div class="modal-content">
-    <h2>🏆 LEADERBOARD</h2>
-    <div id="lbList"><div class="lb-empty">Loading…</div></div>
-    <button class="modal-close" data-close>Close</button>
+    <h2>🏆 低碳排行榜</h2>
+    <div id="lbList"><div class="lb-empty">載入中…</div></div>
+    <button class="modal-close" data-close>關閉</button>
   </div>
 </div>
 
@@ -312,10 +312,17 @@ const API = {
   async req(path, opts = {}) {
     const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
     if (this.token) headers['Authorization'] = 'Bearer ' + this.token;
-    const res = await fetch(path, { ...opts, headers });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error || 'Request failed');
-    return data;
+    try {
+      const res = await fetch(path, { ...opts, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Request failed');
+      return data;
+    } catch (err) {
+      if (err.message === 'Failed to fetch') {
+        throw new Error('伺服器正在喚醒或無法連線。請稍候 30 秒再試。');
+      }
+      throw err;
+    }
   },
   async signup(u, p) { const d = await this.req('/api/signup', { method: 'POST', body: JSON.stringify({ username: u, password: p }) }); this.token = d.token; this.username = d.username; localStorage.setItem('token', d.token); localStorage.setItem('username', d.username); return d; },
   async login(u, p)  { const d = await this.req('/api/login',  { method: 'POST', body: JSON.stringify({ username: u, password: p }) }); this.token = d.token; this.username = d.username; localStorage.setItem('token', d.token); localStorage.setItem('username', d.username); return d; },
@@ -356,9 +363,9 @@ authForm.addEventListener('submit', async e => {
   const fd = new FormData(authForm);
   const u = (fd.get('username') || '').trim();
   const p = fd.get('password') || '';
-  if (!u || !p) { authError.textContent = 'Please fill all fields'; return; }
+  if (!u || !p) { authError.textContent = '請填寫所有欄位'; return; }
   authError.textContent = '';
-  authSubmit.textContent = '...';
+  authSubmit.textContent = '請稍候…';
   try {
     if (authMode === 'login') await API.login(u, p);
     else await API.signup(u, p);
@@ -374,7 +381,7 @@ async function enterApp() {
     const me = await API.me();
     user.username = me.username;
     user.bestCO2 = me.bestCO2;
-    userTag.textContent = `👤 ${me.username}` + (me.bestCO2 ? ` · best ${me.bestCO2.toFixed(2)} kg` : '');
+    userTag.textContent = `👤 ${me.username}` + (me.bestCO2 ? ` · 最佳 ${me.bestCO2.toFixed(2)} kg` : '');
   } catch (e) {
     await API.logout();
     return;
@@ -421,7 +428,7 @@ let animConfig = null;
 submitBtn.addEventListener('click', () => {
   const inp = getInputs();
   const totalGrams = inp.meat + inp.rice + inp.veg;
-  if (totalGrams === 0 || inp.freq === 0) { showToast('⚠ Please enter food grams and days'); return; }
+  if (totalGrams === 0 || inp.freq === 0) { showToast('⚠ 請輸入食物克數與每週天數'); return; }
 
   const dailyCO2 = (inp.meat/1000)*FOODS.meat.coef + (inp.rice/1000)*FOODS.rice.coef + (inp.veg/1000)*FOODS.veg.coef;
   const yearlyCO2 = dailyCO2 * inp.freq * WEEKS_PER_YEAR;
@@ -438,16 +445,16 @@ submitBtn.addEventListener('click', () => {
   statVeg.textContent = inp.veg + ' g';
   statDay.textContent = '0';
   throwDay = 0;
-  timelineTrack.innerHTML = '<div class="timeline-empty">Waiting for day 1…</div>';
-  timelineCount.textContent = '0 days';
+  timelineTrack.innerHTML = '<div class="timeline-empty">等待第一天…</div>';
+  timelineCount.textContent = '0 天';
 
   enterAnim();
 
   API.score(yearlyCO2).then(r => {
     if (r.newBest) {
       user.bestCO2 = r.best;
-      userTag.textContent = `👤 ${user.username} · best ${r.best.toFixed(2)} kg`;
-      showToast(`🏆 New record! ${r.best.toFixed(2)} kg`);
+      userTag.textContent = `👤 ${user.username} · 最佳 ${r.best.toFixed(2)} kg`;
+      showToast(`🏆 新紀錄！${r.best.toFixed(2)} kg`);
     }
   }).catch(() => {});
 });
@@ -721,7 +728,7 @@ function addTimelineItem(day, foods, co2) {
   while (timelineTrack.children.length > 40) timelineTrack.removeChild(timelineTrack.firstChild);
   setTimeout(() => item.classList.remove('new'), 600);
   requestAnimationFrame(() => { timelineScroll.scrollLeft = timelineScroll.scrollWidth; });
-  timelineCount.textContent = `${day} days`;
+  timelineCount.textContent = `${day} 天`;
 }
 
 let lastT = performance.now();
@@ -854,20 +861,20 @@ setInterval(() => {
 
 $('lbBtnCalc').addEventListener('click', async () => {
   lbModal.classList.add('show');
-  lbList.innerHTML = '<div class="lb-empty">Loading…</div>';
+  lbList.innerHTML = '<div class="lb-empty">載入中…</div>';
   try {
     const data = await API.lb();
-    if (!data.length) { lbList.innerHTML = '<div class="lb-empty">No records yet. Be the first!</div>'; return; }
+    if (!data.length) { lbList.innerHTML = '<div class="lb-empty">暫無紀錄，成為第一個吧！</div>'; return; }
     lbList.innerHTML = '';
     data.forEach((row, i) => {
       const isYou = row.username === user.username;
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
       const div = document.createElement('div');
       div.className = 'lb-row' + (isYou ? ' you' : '');
-      div.innerHTML = `<div class="lb-rank">${medal}</div><div class="lb-name">${escapeHtml(row.username)}${isYou ? ' (you)' : ''}</div><div class="lb-co2">${row.co2.toFixed(2)} <small>kg/yr</small></div>`;
+      div.innerHTML = `<div class="lb-rank">${medal}</div><div class="lb-name">${escapeHtml(row.username)}${isYou ? ' (你)' : ''}</div><div class="lb-co2">${row.co2.toFixed(2)} <small>kg/年</small></div>`;
       lbList.appendChild(div);
     });
-  } catch (e) { lbList.innerHTML = '<div class="lb-empty">Failed to load</div>'; }
+  } catch (e) { lbList.innerHTML = '<div class="lb-empty">載入失敗</div>'; }
 });
 
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('.modal').classList.remove('show')));
